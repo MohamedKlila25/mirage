@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "event.json",
+  "title": "event",
+  "description": "Every trap writes this, via the collector (plan section 7). agent_id, user, decoy_id, technique and raw_ref are optional until the collector fills them (Phase 1).",
+  "type": "object",
+  "required": ["event_id", "ts", "source", "host", "session_id", "event_type", "untrusted_content"],
+  "properties": {
+    "event_id": {"type": "string", "pattern": "^evt-[0-9a-z-]+$"},
+    "ts": {"type": "string", "minLength": 1},
+    "source": {"enum": ["cowrie", "wiki", "mcp", "canary", "rag", "victim", "gateway"]},
+    "host": {"type": "string", "minLength": 1},
+    "session_id": {"type": "string", "minLength": 1},
+    "agent_id": {"type": ["string", "null"]},
+    "event_type": {"enum": [
+      "login", "login_failed", "command", "file_read", "file_download", "file_write", "file_upload",
+      "http_request", "tool_call", "trap_hit", "canary_use", "doc_retrieval", "egress", "injection_attempt",
+      "client_version", "session_start", "session_end"
+    ]},
+    "src_ip": {"type": "string"},
+    "user": {"type": ["string", "null"]},
+    "untrusted_content": {"type": "string", "maxLength": 4000},
+    "decoy_id": {"type": ["string", "null"]},
+    "technique": {"type": ["string", "null"], "pattern": "^T\\d{4}(\\.\\d{3})?$"},
+    "raw_ref": {"type": ["string", "null"]},
+    "trap": {
+      "type": "object",
+      "required": ["is_trap"],
+      "properties": {"is_trap": {"type": "boolean"}, "trap_id": {"type": "string"}}
+    }
+  },
+  "additionalProperties": true
+}

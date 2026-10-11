@@ -1,0 +1,343 @@
+{
+  "detection": {
+    "mttd_s": 5.1,
+    "mtta_s": null,
+    "trap_activation_rate": 1.0,
+    "engagement_rate": 0.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "injection_total": 1000,
+    "injection_caught": 1000,
+    "claims_total": 6,
+    "claims_verified": 6,
+    "hallucination_rate": 0.0,
+    "grounding_rate": 1.0
+  },
+  "scenarios": [
+    {
+      "attacker": "evasive",
+      "label": "Evasive blend (blind + exfil)",
+      "difficulty": "hard",
+      "runs": 202,
+      "defended": true,
+      "canary": 0.0,
+      "trap": 3.0,
+      "decoys": 0.0,
+      "tech": 0.0,
+      "docs": 2.0,
+      "exfil": 1.0
+    },
+    {
+      "attacker": "injector",
+      "label": "Injection vs analyst",
+      "difficulty": "hard",
+      "runs": 6,
+      "defended": true,
+      "canary": 1.3,
+      "trap": 0.0,
+      "decoys": 0.7,
+      "tech": 6.2,
+      "docs": 0.0,
+      "exfil": 0.0
+    },
+    {
+      "attacker": "red_team",
+      "label": "Red-team operator (elite)",
+      "difficulty": "hard",
+      "runs": 5,
+      "defended": true,
+      "canary": 17.6,
+      "trap": 0.0,
+      "decoys": 3.6,
+      "tech": 7.6,
+      "docs": 0.0,
+      "exfil": 0.0
+    },
+    {
+      "attacker": "sweep",
+      "label": "Technique sweep (adversary emulation)",
+      "difficulty": "hard",
+      "runs": 3,
+      "defended": true,
+      "canary": 0.0,
+      "trap": 1.0,
+      "decoys": 0.7,
+      "tech": 19.3,
+      "docs": 0.7,
+      "exfil": 0.3
+    },
+    {
+      "attacker": "apt",
+      "label": "APT (evasive, SSH)",
+      "difficulty": "hard",
+      "runs": 2,
+      "defended": true,
+      "canary": 22.0,
+      "trap": 0.0,
+      "decoys": 2.0,
+      "tech": 17.0,
+      "docs": 0.0,
+      "exfil": 0.0
+    },
+    {
+      "attacker": "auto_blend",
+      "label": "Blended (AI surface)",
+      "difficulty": "medium",
+      "runs": 215,
+      "defended": true,
+      "canary": 0.0,
+      "trap": 2.0,
+      "decoys": 0.0,
+      "tech": 0.0,
+      "docs": 3.8,
+      "exfil": 1.0
+    },
+    {
+      "attacker": "victim",
+      "label": "Email hijack",
+      "difficulty": "medium",
+      "runs": 211,
+      "defended": true,
+      "canary": 0.0,
+      "trap": 1.0,
+      "decoys": 0.0,
+      "tech": 0.0,
+      "docs": 0.0,
+      "exfil": 1.0
+    },
+    {
+      "attacker": "mcp_poison",
+      "label": "MCP tool-poisoning",
+      "difficulty": "medium",
+      "runs": 205,
+      "defended": true,
+      "canary": 0.0,
+      "trap": 2.0,
+      "decoys": 0.0,
+      "tech": 0.0,
+      "docs": 0.0,
+      "exfil": 1.0
+    },
+    {
+      "attacker": "rag_thief",
+      "label": "RAG honey-doc theft",
+      "difficulty": "medium",
+      "runs": 203,
+      "defended": true,
+      "canary": 0.0,
+      "trap": 0.0,
+      "decoys": 0.0,
+      "tech": 0.0,
+      "docs": 5.0,
+      "exfil": 1.0
+    },
+    {
+      "attacker": "data_thief",
+      "label": "Credential theft",
+      "difficulty": "medium",
+      "runs": 20,
+      "defended": true,
+      "canary": 26.9,
+      "trap": 0.0,
+      "decoys": 3.7,
+      "tech": 4.0,
+      "docs": 0.0,
+      "exfil": 0.0
+    },
+    {
+      "attacker": "crawler",
+      "label": "Crawler",
+      "difficulty": "easy",
+      "runs": 1,
+      "defended": true,
+      "canary": 1.0,
+      "trap": 0.0,
+      "decoys": 2.0,
+      "tech": 6.0,
+      "docs": 0.0,
+      "exfil": 0.0
+    }
+  ],
+  "defense": [
+    {
+      "vector": "Prompt injection",
+      "owasp": "ASI01",
+      "attempts": 1000,
+      "defended": 1000
+    },
+    {
+      "vector": "Tool misuse",
+      "owasp": "ASI02",
+      "attempts": 1600,
+      "defended": 1600
+    },
+    {
+      "vector": "RAG poisoning",
+      "owasp": "ASI06",
+      "attempts": 2188,
+      "defended": 2188
+    },
+    {
+      "vector": "Exfiltration",
+      "owasp": "egress",
+      "attempts": 1000,
+      "defended": 1000
+    },
+    {
+      "vector": "Credential / lateral",
+      "owasp": "host",
+      "attempts": 8,
+      "defended": 8
+    }
+  ],
+  "att": [
+    {
+      "id": "T1082",
+      "count": 5,
+      "phase": "recon"
+    },
+    {
+      "id": "T1552.001",
+      "count": 5,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1033",
+      "count": 4,
+      "phase": "recon"
+    },
+    {
+      "id": "T1070.003",
+      "count": 4,
+      "phase": "collection"
+    },
+    {
+      "id": "T1016",
+      "count": 3,
+      "phase": "recon"
+    },
+    {
+      "id": "T1005",
+      "count": 2,
+      "phase": "collection"
+    },
+    {
+      "id": "T1049",
+      "count": 2,
+      "phase": "recon"
+    },
+    {
+      "id": "T1053.003",
+      "count": 2,
+      "phase": "collection"
+    },
+    {
+      "id": "T1070.004",
+      "count": 2,
+      "phase": "collection"
+    },
+    {
+      "id": "T1070.006",
+      "count": 2,
+      "phase": "collection"
+    },
+    {
+      "id": "T1098.004",
+      "count": 2,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1136.001",
+      "count": 2,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1546.004",
+      "count": 2,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1548.003",
+      "count": 2,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1007",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1021.004",
+      "count": 1,
+      "phase": "access"
+    },
+    {
+      "id": "T1041",
+      "count": 1,
+      "phase": "exfil"
+    },
+    {
+      "id": "T1057",
+      "count": 1,
+      "phase": "recon"
+    },
+    {
+      "id": "T1069.001",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1078",
+      "count": 1,
+      "phase": "access"
+    },
+    {
+      "id": "T1083",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1087.001",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1105",
+      "count": 1,
+      "phase": "collection"
+    },
+    {
+      "id": "T1132.001",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1518",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1548.001",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1552.003",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1552.004",
+      "count": 1,
+      "phase": "discovery"
+    },
+    {
+      "id": "T1560.001",
+      "count": 1,
+      "phase": "collection"
+    }
+  ],
+  "runs_total": 1079,
+  "events": 9885
+}

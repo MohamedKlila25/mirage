@@ -1,0 +1,41 @@
+# ---- secrets (never commit) ----
+.env
+*.pem
+*.key
+
+# ---- python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# ---- virtual environments ----
+.venv/
+.venv312/
+venv/
+env/
+
+# ---- runtime data (generated at run time, not source) ----
+data/
+exports/
+groundtruth/
+*.log
+
+# ---- editor / OS noise ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ---- Claude Code / local tooling config (not part of the project) ----
+.claude/
+.agents/
+
+# ---- office temp locks + stale pre-rename deck ----
+~$*
+docs/Maya_Deck*.pptx

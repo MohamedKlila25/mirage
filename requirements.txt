@@ -1,0 +1,15 @@
+pydantic>=2.5,<3
+pysigma>=2.0,<3
+pyyaml>=6
+pytest>=8
+pymongo>=4.6,<5
+mongomock>=4.1   # tests only
+boto3>=1.34   # only for bedrock_call_llm in production
+mcp>=2.2,<3   # mirage-control MCP server (SDK 2.x: MCPServer)
+jsonschema>=4.18,<5   # tests: schemas/*.json
+streamlit>=1.50,<2   # dashboard
+fastapi>=0.110,<1   # wiki, llm-gateway
+uvicorn>=0.29,<1
+httpx>=0.27,<1   # tests: FastAPI TestClient
+chromadb>=1.5,<2        # real RAG vector DB (honey-doc retrieval)
+python-pptx>=1.0,<2   # docs/make_deck.py (pitch deck generator)

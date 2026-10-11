@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mirage — Attack Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/console.css">
+</head>
+<body>
+<div id="app">
+  <!-- top bar -->
+  <header>
+    <div class="brand">
+      <div class="mark">M</div>
+      <div><div class="name">MIRAGE</div><div class="tag">Deception Agent OS</div></div>
+    </div>
+    <div class="env" id="envPill"><span class="pulse-dot"></span><span id="envName">no environment</span></div>
+    <select class="sessionsel" id="sessionSel" title="session"></select>
+    <div class="grow"></div>
+    <span class="policy-badge" id="policyBadge"><span class="pd"></span>POLICY: AGENT</span>
+    <div class="launch-inline"><span class="lbl">auto attack</span><input id="atkSeed" type="number" value="2" min="1" title="seed"></div>
+    <button class="btn glow" id="launchBtn">Run Workflow</button>
+    <button class="btn sm" id="approvalsBtn" title="Human approval queue">Approvals <span class="apc" id="apCount">0</span></button>
+    <button class="btn ghost sm" id="resetBtn" title="Clear attack data">Reset</button>
+    <div class="clock" id="clock"></div>
+    <button class="btn kill" id="killBtn">KILL</button>
+  </header>
+
+  <!-- metrics bar -->
+  <div class="metricsbar" id="metricsbar"></div>
+
+  <!-- workflow canvas -->
+  <section class="canvas" id="canvas">
+    <div class="canvastop">
+      <div class="wtitle">Attack Pipeline</div>
+      <div class="wtabs" id="wtabs">
+        <button data-g="all" class="on">All</button>
+        <button data-g="trigger">Trigger</button>
+        <button data-g="environment">Environment</button>
+        <button data-g="ingest">Ingest</button>
+        <button data-g="agent">Agent</button>
+        <button data-g="control">Control</button>
+        <button data-g="output">Output</button>
+      </div>
+    </div>
+    <div class="zones" id="zones"></div>
+    <div class="collabels" id="collabels"></div>
+    <svg class="edges" id="edges"><defs>
+      <filter id="eglow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs></svg>
+    <div class="edgelabels" id="edgelabels"></div>
+    <div id="nodes"></div>
+    <div class="legend" id="legend">
+      <span><i class="lg flow"></i>data flowing</span>
+      <span><i class="lg human"></i>waiting on a human</span>
+      <span><i class="lg alert"></i>alert / blocked</span>
+      <span><i class="lg idle"></i>idle</span>
+      <span><i class="lg feedback"></i>feedback loop: new decoys back into the environment</span>
+      <span class="note" id="legendNote">live · every value comes from MongoDB, config or export files</span>
+    </div>
+    <div class="runbar" id="runbar">idle</div>
+    <div class="scrollhint" id="scrollHint">metrics below <span>v</span></div>
+  </section>
+</div>
+
+<!-- scroll-down analytics -->
+<section class="analytics" id="analytics">
+  <div class="ana-head">
+    <div><div class="ana-title">Run analytics</div><div class="ana-sub2">live from MongoDB &middot; latest <span id="anaRun">&mdash;</span></div></div>
+    <div class="ana-tabs"><span id="anaPolicy">policy: agent</span></div>
+  </div>
+  <div class="ana-sec">Mirage is learning <span class="dim" id="anaLearnSub"></span> <button class="lcreplay glow" id="learnRun">▸ run learning demo</button> <button class="lcreplay" id="learnReplay">↻ replay</button></div>
+  <div class="ana-panel" id="learnPanel">
+    <div class="ana-grid tight" id="anaLearnStats" style="margin-bottom:16px"></div>
+    <div class="learnchart"><div class="lcaxis"><span>100%</span><span>50%</span><span>0%</span></div><div class="lcbody" id="anaLearnChart"></div></div>
+    <div class="lclegend"><span><i style="background:var(--accent)"></i>knowledge coverage</span><span><i style="background:var(--gold)"></i>past cases reused</span></div>
+  </div>
+  <div class="ana-sec">Scenarios defended <span class="dim" id="anaScenRuns"></span></div>
+  <div class="ana-panel"><div id="anaScenarios"></div></div>
+  <div class="ana-sec">Effectiveness</div>
+  <div class="ana-grid" id="anaEffect"></div>
+</section>
+
+<!-- node detail drawer -->
+<aside class="drawer" id="drawer">
+  <div class="dhead"><span id="dtitle">node</span><button class="dx" id="drawerClose">close</button></div>
+  <div class="dbody" id="drawerBody"></div>
+</aside>
+
+<!-- approval popup -->
+<div class="modal-wrap" id="modalWrap">
+  <div class="modal" id="modal">
+    <div class="mhead"><span id="modalTitle">Pending approvals</span><button class="dx" id="modalClose">close</button></div>
+    <div class="mbody" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/static/console.js"></script>
+</body>
+</html>

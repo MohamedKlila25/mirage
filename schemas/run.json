@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "run.json",
+  "title": "run",
+  "description": "One row of the experiment matrix (plan sections 7 and 10). Evaluation only.",
+  "type": "object",
+  "required": ["run_id", "policy", "attacker", "seed", "started", "ended", "metrics"],
+  "properties": {
+    "run_id": {"type": "string", "pattern": "^r-[0-9a-z_-]+$"},
+    "policy": {"enum": ["static", "rl", "agent"]},
+    "attacker": {"enum": ["crawler", "data_thief", "injector", "ai_recon", "victim"]},
+    "seed": {"type": "integer"},
+    "started": {"type": "string"},
+    "ended": {"type": "string"},
+    "metrics": {"type": "object"}
+  },
+  "additionalProperties": false
+}

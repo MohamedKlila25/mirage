@@ -1,0 +1,195 @@
+# Mirage: attack zone (attack-net, internal: no internet) and defense zone (defense-net).
+# Files flow between zones through host folders under ./data (no container is on both networks;
+# only llm-gateway also has egress-net, to reach Bedrock).
+#
+#   ./setup.sh
+#   docker compose up -d --build                                  # defense zone, wiki, gateway
+#   docker compose run --rm builder design                        # the agent designs the decoy environment
+#   docker compose run --rm builder approve <env_id> <analyst>    # a human approves it -> rendered by code
+#   docker compose -f docker-compose.yml -f data/render/compose.override.yml --profile decoys up -d
+#   docker compose run --rm test-attacker                         # manual test client on attack-net
+
+x-decoy: &decoy
+  image: cowrie/cowrie:latest
+  restart: unless-stopped
+  profiles: [decoys]           # started only once an environment is rendered (Cowrie needs its fs.pickle)
+  networks: [attack-net]
+  read_only: true              # container filesystem is read-only; only its var/ folder is writable
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  # no "ports:" on purpose: decoys are only reachable from inside attack-net
+
+x-cowrie-env: &cowrie-env      # rendered by builder/render.py (env overrides = COWRIE_<SECTION>_<OPTION>)
+  COWRIE_SHELL_FILESYSTEM: /maya/render/fs.pickle
+  COWRIE_HONEYPOT_ETC_PATH: /maya/render/etc          # userdb.txt: who can log in
+  COWRIE_HONEYPOT_CONTENTS_PATH: /maya/honeyfs        # file contents, re-read at each session
+
+services:
+  fake-jump-01:
+    <<: *decoy
+    hostname: fake-jump-01        # replaced by the designed name in data/render/compose.override.yml
+    environment: { <<: *cowrie-env, COWRIE_HONEYPOT_HOSTNAME: fake-jump-01 }
+    volumes:
+      - ./data/decoys/fake-jump-01:/cowrie/cowrie-git/var
+      - ./data/render/fake-jump-01:/maya/render:ro
+      - ./data/deception/fake-jump-01:/maya/honeyfs:ro
+
+  fake-db-01:
+    <<: *decoy
+    hostname: fake-db-01
+    environment: { <<: *cowrie-env, COWRIE_HONEYPOT_HOSTNAME: fake-db-01 }
+    volumes:
+      - ./data/decoys/fake-db-01:/cowrie/cowrie-git/var
+      - ./data/render/fake-db-01:/maya/render:ro
+      - ./data/deception/fake-db-01:/maya/honeyfs:ro
+
+  fake-ftp-01:                    # running, but nobody can log in until open_decoy_service (tier 3)
+    <<: *decoy
+    hostname: fake-ftp-01
+    environment: { <<: *cowrie-env, COWRIE_HONEYPOT_HOSTNAME: fake-ftp-01 }
+    volumes:
+      - ./data/decoys/fake-ftp-01:/cowrie/cowrie-git/var
+      - ./data/render/fake-ftp-01:/maya/render:ro
+      - ./data/deception/fake-ftp-01:/maya/honeyfs:ro
+
+  wiki:
+    build: { context: ., dockerfile: honeynet/wiki/Dockerfile }
+    restart: unless-stopped
+    networks: [attack-net]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    volumes:
+      - ./data/deception/wiki:/wiki:ro
+      - ./data/control:/control:ro          # tiers.json: internal pages from tier 2
+      - ./data/trap-logs:/trap-logs         # every request is logged
+
+  llm-gateway:
+    build: { context: ., dockerfile: honeynet/gateway/Dockerfile }
+    restart: unless-stopped
+    networks: [attack-net, egress-net]      # the only attack-zone container with a route out (Bedrock only)
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      ALLOWED_MODELS: ${GATEWAY_MODELS:-${BEDROCK_MODEL_ID:-}}
+      EMBED_MODEL: ${EMBED_MODEL:-amazon.titan-embed-text-v2:0}
+      MAX_TOKENS: "1500"
+      DAILY_CALLS_PER_CALLER: "400"
+      GUARDRAIL_ID: ${GUARDRAIL_ID:-}
+      GUARDRAIL_VERSION: ${GUARDRAIL_VERSION:-}
+    volumes:
+      - ./data/trap-logs:/trap-logs
+
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    networks: [defense-net]
+    volumes: ["mongo-data:/data/db"]
+
+  collector:
+    build: { context: ., dockerfile: collector/Dockerfile }
+    restart: unless-stopped
+    networks: [defense-net]
+    depends_on: [mongodb]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/maya
+      COLLECTOR_LOGS: /decoys
+      COLLECTOR_TRAP_LOGS: /trap-logs
+    volumes:
+      - ./data/decoys:/decoys:ro            # reads decoy logs; cannot write to them
+      - ./data/trap-logs:/trap-logs:ro
+      - collector-state:/state
+
+  defender:
+    build: { context: ., dockerfile: defender/Dockerfile }
+    restart: unless-stopped
+    networks: [defense-net]          # needs outbound HTTPS to Bedrock; no route to the decoys
+    depends_on: [mongodb, collector]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/maya
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:?set BEDROCK_MODEL_ID in .env}
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      DECOY_HOSTS: fake-jump-01,fake-db-01,fake-ftp-01
+      BATCH_SIZE: "10"
+      BATCH_WAIT_S: "30"
+      MAX_LLM_CALLS_PER_SESSION: "20"
+      ACTUATOR_URL: ""                # set once the actuator exists
+    volumes:
+      - defender-audit:/audit
+
+  mirage-control:
+    build: { context: ., dockerfile: control/Dockerfile }
+    restart: unless-stopped
+    networks: [defense-net]          # the agent's only tools; never on attack-net
+    depends_on: [mongodb]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/maya
+      MANIFEST_PATH: /deception/manifest.json
+      RENDER_DIR: /render
+    volumes:
+      - ./honeynet/cowrie/static:/templates:ro
+      - ./data/deception:/deception          # decoys and wiki read this (read-only) on attack-net
+      - ./data/control:/control              # tiers, open services, revoked agents, disabled tools
+      - ./data/render:/render                # open_decoy_service enables the closed decoy's logins
+      - ./exports:/exports
+      - control-audit:/audit
+
+  builder:                           # one-shot: design (LLM) / approve + render (code). Not started by "up".
+    build: { context: ., dockerfile: builder/Dockerfile }
+    profiles: [tools]
+    networks: [defense-net]
+    depends_on: [mongodb]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/maya
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      DECEPTION_DIR: /deception
+      RENDER_DIR: /render
+    volumes:
+      - ./data/deception:/deception
+      - ./data/render:/render
+
+  dashboard:
+    build: { context: ., dockerfile: dashboard/Dockerfile }
+    restart: unless-stopped
+    networks: [defense-net]
+    depends_on: [mongodb]
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/maya
+    ports: ["127.0.0.1:8501:8501"]   # localhost only: reach it with  ssh -L 8501:localhost:8501 <ec2>
+
+  # Reactive crawler on attack-net. Not started by "up"; run one crawl against a rendered environment:
+  #   docker compose run --rm attacker --entry <hostname> --user <user> --password <pw> --seed 1 \
+  #     --decoys <h1>,<h2>,<h3> --groundtruth /groundtruth
+  # Entry creds come from the approved environment (data/render/<slot>/etc/userdb.txt).
+  attacker:
+    build: { context: ., dockerfile: attackers/Dockerfile }
+    profiles: [tools]
+    networks: [attack-net]
+    environment:
+      WIKI_BASE: http://wiki
+      GROUNDTRUTH_DIR: /groundtruth
+    volumes:
+      - ./data/groundtruth:/groundtruth    # the defender never mounts this (ground truth for scoring)
+
+  # Manual test client inside attack-net. Not started by "up"; use "docker compose run".
+  test-attacker:
+    build: { context: tools/test-attacker }
+    profiles: [test]
+    networks: [attack-net]
+    stdin_open: true
+    tty: true
+
+networks:
+  attack-net:
+    internal: true    # no internet in the attack zone; only llm-gateway also joins egress-net
+  defense-net: {}
+  egress-net: {}
+
+volumes:
+  mongo-data: {}
+  collector-state: {}
+  defender-audit: {}
+  control-audit: {}

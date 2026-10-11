@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summary.json",
+  "title": "summary",
+  "description": "Analyst-facing incident summary (plan section 7). 'check' is set by the evidence checker (code), never by the LLM; 'unchecked' until it ran.",
+  "type": "object",
+  "required": ["session_id", "profile", "claims", "techniques", "next_moves", "injection_detected", "recommended"],
+  "properties": {
+    "session_id": {"type": "string", "minLength": 1},
+    "profile": {
+      "type": "object",
+      "required": ["actor", "skill", "objective", "confidence"],
+      "properties": {
+        "actor": {"enum": ["human", "bot", "ai_agent", "unknown"]},
+        "skill": {"enum": ["low", "mid", "high", "unknown"]},
+        "objective": {"type": "string", "minLength": 1, "maxLength": 64},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["text", "confidence", "evidence", "check"],
+        "properties": {
+          "text": {"type": "string", "minLength": 1, "maxLength": 500},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "evidence": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+          "check": {"enum": ["unchecked", "verified", "weak", "unsupported"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "techniques": {"type": "array", "items": {"type": "string", "pattern": "^T\\d{4}(\\.\\d{3})?$"}},
+    "next_moves": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["technique", "p"],
+        "properties": {
+          "technique": {"type": "string", "pattern": "^T\\d{4}(\\.\\d{3})?$"},
+          "p": {"type": "number", "minimum": 0, "maximum": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "injection_detected": {"type": "boolean"},
+    "recommended": {
+      "type": "array",
+      "items": {"type": "object", "required": ["tool"], "properties": {"tool": {"type": "string"}}}
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "decoy.json",
+  "title": "decoy",
+  "description": "Every breadcrumb, file or wiki page planted (plan section 7). Written by mirage-control (per session, evidence required by its checks) or by builder/render.py (session_id 'environment': the approved environment, no attack evidence yet).",
+  "type": "object",
+  "required": ["decoy_id", "session_id", "host", "kind", "path", "policy", "reason", "evidence", "created_at", "touched_by"],
+  "properties": {
+    "decoy_id": {"type": "string", "pattern": "^dec-[0-9a-z]+$"},
+    "session_id": {"type": "string", "minLength": 1},
+    "host": {"type": "string", "minLength": 1},
+    "kind": {"enum": ["file", "wiki_page", "credential"]},
+    "path": {"type": "string", "pattern": "^/"},
+    "policy": {"enum": ["static", "rl", "agent"]},
+    "canaries": {"type": "array", "items": {"type": "string", "pattern": "^canary:[a-z0-9_]+$"}},
+    "reason": {"type": "string", "minLength": 1},
+    "evidence": {"type": "array", "items": {"type": "string"}},
+    "action_id": {"type": "string"},
+    "created_at": {"type": "string"},
+    "touched_by": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": true
+}

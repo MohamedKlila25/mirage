@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "action.json",
+  "title": "action",
+  "description": "Audit record of every mirage-control call, allowed or not (plan section 7). blocked_by also has 'evidence' and 'never_block', which mirage-control uses.",
+  "type": "object",
+  "required": ["action_id", "ts", "session_id", "policy", "tool", "params", "risk", "status", "blocked_by",
+               "reason", "evidence", "decided_by", "decided_at", "reject_reason"],
+  "properties": {
+    "action_id": {"type": "string", "pattern": "^act-[0-9a-z]+$"},
+    "ts": {"type": "string"},
+    "session_id": {"type": "string", "minLength": 1},
+    "batch_id": {"type": "string"},
+    "policy": {"enum": ["static", "rl", "agent"]},
+    "tool": {"type": "string"},
+    "params": {"type": "object"},
+    "risk": {"enum": ["auto", "approval", null]},
+    "status": {"enum": ["executed", "pending", "approved", "rejected", "blocked"]},
+    "blocked_by": {"enum": ["schema", "allowlist", "kill_switch", "cap", "evidence", "never_block", null]},
+    "reason": {"type": "string"},
+    "evidence": {"type": "array", "items": {"type": "string"}},
+    "detail": {"type": "string"},
+    "decided_by": {"type": ["string", "null"]},
+    "decided_at": {"type": ["string", "null"]},
+    "reject_reason": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}
