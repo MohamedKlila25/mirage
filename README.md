@@ -88,7 +88,7 @@ The agent is treated as a threat surface, mapped to OWASP Agentic Security (ASI)
 ### Setup (Windows / PowerShell)
 ```powershell
 # 1. clone
-git clone https://github.com/<you>/mirage.git
+git clone https://github.com/MohamedKlila25/mirage.git
 cd mirage
 
 # 2. create the venv (the .ps1 helpers expect it at .venv312)
