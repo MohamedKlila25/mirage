@@ -1,5 +1,5 @@
 <div align="center">
-
+ 
 # 🪞 MIRAGE
 
 ### An AI deception defense that turns a breach into an intelligence advantage.
