@@ -51,7 +51,7 @@ Classic honeypots help — but they're static, so a skilled attacker fingerprint
 
 | Step | What happens |
 |------|--------------|
-| 🪤 **Trap** | A believable decoy environment — fake SSH shell, an MCP tool server, a RAG knowledge store — absorbs the intruder instead of real assets. Everything is seeded with **canary tokens**. |
+| 🪤 **Trap** | A believable decoy environment - fake SSH shell, an MCP tool server, a RAG knowledge store - absorbs the intruder instead of real assets. Everything is seeded with **canary tokens**. |
 | 🔎 **Profile & deceive** | The defender agent reads the attacker's behavior live, maps it to **MITRE ATT&CK**, and plants decoys tailored to what they seem to be after. |
 | 🧑‍✈️ **Human in control** | Every consequential action is gated behind **analyst approval**, with a one-button **kill switch**. |
 | 📚 **Learn** | A **cross-session incident memory** lets the agent recognize repeat techniques and reuse what worked before. |
@@ -73,11 +73,11 @@ flowchart LR
     F --> G([Actions / alerts])
 ```
 
-- **Decoy environment** — emulated Cowrie SSH honeynet, a **real MCP (stdio)** tool server, and a **real RAG** store (Titan embeddings + Chroma) full of honey-documents.
-- **Collector** — tails decoy logs, enriches each event, maps actions to **MITRE ATT&CK**, and writes to the **MongoDB** event store.
+- **Decoy environment** : emulated Cowrie SSH honeynet, a **real MCP (stdio)** tool server, and a **real RAG** store (Titan embeddings + Chroma) full of honey-documents.
+- **Collector** : tails decoy logs, enriches each event, maps actions to **MITRE ATT&CK**, and writes to the **MongoDB** event store.
 - **Mirage brain** — the defender policy on **AWS Bedrock** (Claude Sonnet for strategy; a small model, **Amazon Nova Micro**, for the “watch it learn” demo), consulting cross-session memory.
-- **Control** — every proposed action passes through `mirage-control`, which re-checks it, auto-runs safe actions, and queues the rest for a human. Houses the kill switch.
-- **Dashboard** — a FastAPI “SOC console” rendering the whole pipeline live from MongoDB, plus run analytics and the learning curve.
+- **Control** : every proposed action passes through `mirage-control`, which re-checks it, auto-runs safe actions, and queues the rest for a human. Houses the kill switch.
+- **Dashboard** : a FastAPI “SOC console” rendering the whole pipeline live from MongoDB, plus run analytics and the learning curve.
 
 <details>
 <summary><b>📂 Repository layout</b> (click to expand)</summary>
@@ -125,7 +125,7 @@ The agent is treated as a **threat surface**, mapped to **OWASP Agentic Security
 ### Prerequisites
 - **Python 3.12**
 - **MongoDB** running locally (default `mongodb://127.0.0.1:27017`)
-- **AWS Bedrock** access in `us-west-2` — *optional*; only needed for the agent's LLM decisions and build mode. Tests and the no-LLM event demo run without it.
+- **AWS Bedrock** access in `us-west-2` - *optional*; only needed for the agent's LLM decisions and build mode. Tests and the no-LLM event demo run without it.
 
 <details open>
 <summary><b>🪟 Windows / PowerShell</b></summary>
@@ -138,7 +138,7 @@ py -3.12 -m venv .venv312               # the .ps1 helpers expect the venv here
 .\.venv312\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-copy .env.example .env                  # optional — fill in AWS values for Bedrock
+copy .env.example .env                  # optional - fill in AWS values for Bedrock
 powershell -ExecutionPolicy Bypass -File scripts\mongo.ps1   # start / verify MongoDB
 ```
 </details>
@@ -154,7 +154,7 @@ python3.12 -m venv .venv312
 source .venv312/bin/activate
 pip install -r requirements.txt
 
-cp .env.example .env                    # optional — fill in AWS values for Bedrock
+cp .env.example .env                    # optional - fill in AWS values for Bedrock
 # ensure a local MongoDB is running on 127.0.0.1:27017
 ```
 </details>
@@ -181,7 +181,7 @@ PYTHONPATH=. python scripts/many_events.py 1000   # populate the event store wit
 PYTHONPATH=. python -m pytest -q      # expect: 366 passed
 ```
 
-The suite runs against **mongomock** — no live database or AWS access required. It exercises the collector, ATT&CK mapping, agent policy, control/approval flow, memory, canary tokens, MCP transport, RAG, reliability (grounding + Sigma), and the dashboard API.
+The suite runs against **mongomock** - no live database or AWS access required. It exercises the collector, ATT&CK mapping, agent policy, control/approval flow, memory, canary tokens, MCP transport, RAG, reliability (grounding + Sigma), and the dashboard API.
 
 ---
 
