@@ -205,6 +205,6 @@ The suite runs against **mongomock** - no live database or AWS access required. 
 <div align="center">
 
 Built for the **Secure Horizon** hackathon — *Track 2: AI for Security & Secure AI*.
-Prototype; no warranty
+Prototype; no warranty.
 
 </div>
